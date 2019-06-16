@@ -47,7 +47,7 @@ Do the following steps sequentially:
 2. Install docker and docker-compose\
 `./run.sh installdocker`
 3. Create a .env file from the example and secure it\
-`cp .env.example .env`
+`cp .env.example .env`\
 `chmod 700 .env`
 4. Carefully edit all the variables in the .env file and save it\
 `nano .env`
