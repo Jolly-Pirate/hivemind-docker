@@ -56,6 +56,8 @@ Hivemind requires a postgres backend. Start postgres with these two commands con
 ## Importing database dump
 For an efficient way to get hivemind going with a short DB synchronization, download a database dump (from a daily postgres snapshot), and import it. The dump was done with PostgreSQL 10.8. ETA depends on your internet speed, storage and CPU.
 
+NOTE: The download and import will run in screen sessions and automatically exit when complete. After the dump file is fully read, the import may seem stalled, but it's actually creating the indexes. Do not stop the process with `ctrl-c` or close the session . You can detach from the session with `ctrl-a-d`.
+
 `./run.sh importdb`
 
 **ETA ~3h**

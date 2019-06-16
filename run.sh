@@ -202,12 +202,12 @@ importdb() {
   if [[ $dump_state == "backup complete." ]]; then
     # Extract base filename from url, also: url=http://www.foo.bar/file.ext; basename $url
     archive_filename=$(url=${DB_DUMP_URL}; echo "${url##*/}")
-    echo -e $bldblu"Downloading the latest dump"$reset
+    echo -e $bldblu"Downloading the latest dump (screen session)"$reset
     wget -c $DB_DUMP_URL
     if [ -f $archive_filename ]; then
       sleep 3
       # Import DB
-      time screen -S import -m bash -c "echo -e \"$bldblu Importing the dump into postgresql using $(nproc) jobs $reset\" ; pv $archive_filename | docker exec -i $POSTGRES_CONTAINER bash -c \"PGPASSWORD=$POSTGRES_PASSWORD pg_restore -U $POSTGRES_USER -d $POSTGRES_DB\" -j $(nproc)"
+      time screen -S import -m bash -c "echo -e \"$bldblu Importing the dump into postgresql using $(nproc) jobs (screen session) $reset\" ; pv $archive_filename | docker exec -i $POSTGRES_CONTAINER bash -c \"PGPASSWORD=$POSTGRES_PASSWORD pg_restore -U $POSTGRES_USER -d $POSTGRES_DB\" -j $(nproc)"
       # Check the DB size
       dbsize
     else
