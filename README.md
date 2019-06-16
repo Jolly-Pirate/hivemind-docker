@@ -22,7 +22,7 @@ Table of Contents
 <!--te-->
 
 ## Features
-- Easy deployment with simple commands
+- High flexibility with simple commands
 - Local storage of the database for easier redeployment in an infrastructure
 - Cli commands to control the containers
 
