@@ -41,7 +41,9 @@ start() {
   case $1 in
     all)
       # Better to initdb and remove it instead of depends_on in the yml
-      docker-compose up -d initdb postgres hive
+	  docker-compose up initdb
+      docker-compose rm -f initdb
+      docker-compose up -d postgres hive
       #docker-compose up -d --scale jussi=0 --scale initdb=0 # Do not start jussi, initdb=0 will also stop/rm it
       logs
     ;;
