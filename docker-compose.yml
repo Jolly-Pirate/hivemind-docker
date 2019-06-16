@@ -1,0 +1,113 @@
+# Docker Engine version 18.06.0+
+# Network name requires v3.5+
+version: "3.7"
+services:
+  initdb:
+    build: 
+      context: ./dkr
+      args:
+        - POSTGRES_USER=$POSTGRES_USER
+        - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+        - POSTGRES_DB=$POSTGRES_DB
+    image: $POSTGRES_CONTAINER:latest
+    container_name: $POSTGRES_INIT_CONTAINER
+    environment:
+      - TZ=$TIMEZONE
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+      - POSTGRES_DB=$POSTGRES_DB
+    volumes:
+       - ./$DATA_DIR/$POSTGRES_DB:/temp/main
+    command: bash -c "/entrypoint.sh init"
+    networks:
+      - hivenet
+  postgres:
+    build: 
+      context: ./dkr
+      args:
+        - POSTGRES_USER=$POSTGRES_USER
+        - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+        - POSTGRES_DB=$POSTGRES_DB
+    image: $POSTGRES_CONTAINER:latest
+    container_name: $POSTGRES_CONTAINER
+    environment:
+      - TZ=$TIMEZONE
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+      - POSTGRES_DB=$POSTGRES_DB
+    networks:
+      - hivenet
+    ports:
+      - $POSTGRES_PORT:5432
+    volumes:
+       - ./$DATA_DIR/$POSTGRES_DB:/var/lib/postgresql/10/main
+    # loop workaround to avoid a race condition
+    command: >
+      bash -c "
+        while ping -c1 $POSTGRES_INIT_CONTAINER &>/dev/null
+        do
+          echo -e \"\e[0;35mWaiting for $POSTGRES_INIT_CONTAINER to finish\e[0m\"
+          sleep 1
+        done
+        /entrypoint.sh run
+      "
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1G"
+        max-file: "1"
+    restart: always
+  hive:
+    image: steemit/hivemind:latest
+    container_name: $HIVEMIND_CONTAINER
+    environment:
+      - TZ=$TIMEZONE
+      - DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_URL/$POSTGRES_DB
+      - STEEMD_URL=$RPC
+      - SYNC_SERVICE=1
+    networks:
+      - hivenet
+    ports:
+      - $HIVEMIND_PORT:8080
+    depends_on:
+      - postgres
+    # loop workaround to avoid a race condition,
+    # need postgres ready to receive connections before hivemind starts
+    command: > 
+      bash -c "
+        sleep 5
+        while ! pg_isready -d $POSTGRES_DB -U $POSTGRES_USER -h postgres | grep 'accepting connections' \
+              || ping -c1 $POSTGRES_INIT_CONTAINER &>/dev/null
+        do
+          echo -e \"\e[0;35mWaiting for $POSTGRES_CONTAINER to start\e[0m\"
+          sleep 5
+        done
+        /usr/local/bin/entrypoint.sh
+      "
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1G"
+        max-file: "1"
+    restart: always
+  jussi:
+     image: steemit/jussi:latest
+     container_name: jussi
+     environment:
+       - TZ=$TIMEZONE
+       - JUSSI_UPSTREAM_CONFIG_FILE=/app/config.json
+     volumes:
+        - ./DEV_config.json:/app/config.json
+     networks:
+       - hivenet
+     ports:
+       - $JUSSI_PORT:8080
+     logging:
+       driver: "json-file"
+       options:
+         max-size: "1G"
+         max-file: "1"
+     restart: always
+networks:
+  hivenet:
+    name: hivenet
