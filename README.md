@@ -2,9 +2,12 @@ Hivemind and PostgreSQL docker
 ===
 Hive (https://github.com/steemit/hivemind) is a "consensus interpretation" layer for the Steem blockchain, maintaining the state of social features such as post feeds, follows, and communities. Written in Python, it synchronizes an SQL database with chain state, providing developers with a more flexible/extensible alternative to the raw steemd API.
 
+I'm using docker-compose for this project because of its flexibility in managing multiple containers, and to minimize the use of long complicated docker cli commands. With dependency checks in the scripts, I covered many possibilities to make a hivemind deployment easy. The tricky and frustrating part was to get postgres to use a mapped local database outside of docker volumes. The reason for that is to have better control of the database and to simplify  redeployment to other servers, instead of having to redownload/reimport a dump which takes hours. Postgres is picky about permissions, plus its native command `initdb` was causing errors when synchronizing an imported hivemind dump. After solving the problems with some workarounds and thoroughly testing, hivemind-docker was finally ready.
+
 Table of Contents
 =================
 <!--ts-->
+   * [Features](#features)
    * [Requirements](#requirements)
    * [Git installation](#git-installation)
    * [Preparation](#preparation)
@@ -16,8 +19,12 @@ Table of Contents
    * [Running Jussi](#running-jussi)
    * [Checking the logs](#checking-the-logs)
    * [Project command options](#project-command-options)
-   * [Notes](#notes)
 <!--te-->
+
+## Features
+- Easy deployment with simple commands
+- Local storage of the database for easier redeployment in an infrastructure
+- Cli commands to control the containers
 
 ## Requirements
 - Docker Engine 18.06.0+
@@ -153,9 +160,6 @@ Here's a summary of the available commands:
  dbsize        - check the database size
  dbactivity    - check the database activity
 ```
-
-## Notes
-I'm using docker-compose for this project because of its flexibility in managing multiple containers, and to minimize the use of long complicated docker cli commands. With dependency checks in the scripts, I covered many possibilities to make a hivemind deployment easy.
 
 ---
 ###### tags: `steemd` `hivemind` `postgresql` `blockchain` `database` `docker` `docker-compose`
