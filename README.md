@@ -59,7 +59,7 @@ Do the following steps sequentially:
 Hivemind requires a postgres backend. Start postgres with these two commands consecutively:
 
 `./run.sh initdb` (will initialize a fresh database cluster)\
-`./run.sh start pg` (will start postgres using the credentials from .env)
+`./run.sh start postgres` (will start postgres using the credentials from .env)
 
 ## Importing database dump
 For an efficient way to get hivemind going with a short DB synchronization, download a database dump (from a daily postgres snapshot), and import it. The dump was done with PostgreSQL 10.8. ETA depends on your internet speed, storage and CPU.
