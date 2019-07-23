@@ -42,15 +42,15 @@ chmod +x run.sh
 ## Preparation
 Do the following steps sequentially:
 
-1. Preinstall tools and NTP synchronization\
-`./run.sh preinstall`
-2. Install docker and docker-compose\
-`./run.sh installdocker`
-3. Create a .env file from the example and secure it\
+1. Create a .env file from the example and secure it\
 `cp .env.example .env`\
 `chmod 700 .env`
-4. Carefully edit all the variables in the .env file and save it\
+2. Carefully edit all the variables in the .env file and save it\
 `nano .env`
+3. Preinstall tools and NTP synchronization\
+`./run.sh preinstall`
+4. Install docker and docker-compose\
+`./run.sh installdocker`
 5. Build the needed containers\
 `./run.sh build`
 
