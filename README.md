@@ -13,6 +13,7 @@ Table of Contents
    * [Preparation](#preparation)
    * [Running Postgres](#running-postgres)
    * [Importing database dump](#importing-database-dump)
+   * [Dumping database](#dumping-database)
    * [Running Hivemind](#running-hivemind)
    * [Running Hivemind and Postgres simultaneously](#running-hivemind-and-postgres-simultaneously)
    * [Testing Hivemind](#testing-hivemind)
@@ -69,6 +70,11 @@ NOTE: The download and import will run in screen sessions and automatically exit
 `./run.sh importdb`
 
 **ETA ~3h**
+
+## Dumping database
+Dump the database into a compressed binary file
+
+`./run.sh dumpdb`
 
 ## Running Hivemind
 After the DB import, start hivemind to synchronize the missing blocks.
@@ -145,6 +151,7 @@ Here's a summary of the available commands:
 
  initdb        - initialize database cluster (e.g. postgresql database)
  importdb      - download and import the database dump
+ dumpdb        - dump the database (compressed binary file) from postgresql
 
  start|stop|restart (e.g. start all)
            all - initdb+postgresql+hivemind
