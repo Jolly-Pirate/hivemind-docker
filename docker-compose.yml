@@ -60,7 +60,7 @@ services:
         max-file: "1"
     restart: always
   hive:
-    image: steemit/hivemind:latest
+    image: hivemind:latest
     container_name: $HIVEMIND_CONTAINER
     environment:
       - TZ=$TIMEZONE

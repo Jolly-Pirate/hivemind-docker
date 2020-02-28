@@ -4,5 +4,6 @@
 **/*.gz
 **/*.json
 **/pgdata
+**/tmp
 **/trash
 .env

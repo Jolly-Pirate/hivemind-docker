@@ -41,7 +41,7 @@ start() {
   case $1 in
     all)
       # Better to initdb and remove it instead of depends_on in the yml
-	  docker-compose up initdb
+      docker-compose up initdb
       docker-compose rm -f initdb
       docker-compose up -d postgres hive
       #docker-compose up -d --scale jussi=0 --scale initdb=0 # Do not start jussi, initdb=0 will also stop/rm it
@@ -179,8 +179,9 @@ You will have to re-login and restart the containers after the update.
 
 build(){
   docker-compose down
-  docker pull steemit/hivemind:latest # Update it
-  docker rm hiveupdate
+  #docker pull steemit/hivemind:latest # Update it
+  docker pull jollypirate/hivemind:214-core
+  docker tag jollypirate/hivemind:214-core hivemind:latest
   docker rmi $POSTGRES_CONTAINER
   docker-compose build
   # Clean up
@@ -209,7 +210,7 @@ importdb() {
     if [ -f $archive_filename ]; then
       sleep 3
       # Import DB
-      time screen -S import -m bash -c "echo -e \"$bldblu Importing the dump into postgresql using $(nproc) jobs (screen session) $reset\" ; pv $archive_filename | docker exec -i $POSTGRES_CONTAINER bash -c \"PGPASSWORD=$POSTGRES_PASSWORD pg_restore -U $POSTGRES_USER -d $POSTGRES_DB\" -j $(nproc)"
+      time screen -S import -m bash -c "echo -e \"$bldblu Importing the dump into postgresql using `expr $(nproc) - 2` jobs (screen session) $reset\" ; pv $archive_filename | docker exec -i $POSTGRES_CONTAINER bash -c \"PGPASSWORD=$POSTGRES_PASSWORD pg_restore -U $POSTGRES_USER -d $POSTGRES_DB\" -j `expr $(nproc) - 2`"
       # Check the DB size
       dbsize
     else
@@ -217,6 +218,22 @@ importdb() {
     fi
   else
     echo -e $bldpur"DB dump still in progress, retry later"$reset
+  fi
+}
+
+dumpdb() {
+  if [[ ! $(docker ps -aq -f status=running -f name=$POSTGRES_CONTAINER) ]]; then
+    echo -e $bldred"$POSTGRES_CONTAINER container not running, start it before dumping the database"$reset
+    exit
+  fi
+  # Extract base filename from url, also: url=http://www.foo.bar/file.ext; basename $url
+  archive_filename="hive_latest.dump"
+  if [ ! -f $archive_filename ]; then
+    sleep 3
+    # Dump DB
+    time screen -S import -m bash -c "echo -e \"$bldblu Dumping the database from postgresql using `expr $(nproc) - 2` jobs (screen session) $reset\" ; docker exec -i $POSTGRES_CONTAINER bash -c \"PGPASSWORD=$POSTGRES_PASSWORD pg_dump -U $POSTGRES_USER -d $POSTGRES_DB\" -j`expr $(nproc) - 2` -Fc | pv --progress --size 1g > $archive_filename"
+  else
+    echo -e $bldred"$archive_filename exists, delete it first"$reset
   fi
 }
 
@@ -232,6 +249,16 @@ testhive() {
 testjussi() {
   set -x
   curl -s --data '[{"jsonrpc":"2.0", "method":"condenser_api.get_dynamic_global_properties", "params":[], "id":1}]' http://localhost:$JUSSI_PORT | jq -r
+}
+
+testhivecom() {
+  set -x
+  curl -s --data '[{"jsonrpc":"2.0", "method":"bridge.unread_notifications", "params":{"account":"initminer"}, "id":1}]' http://localhost:$HIVEMIND_PORT | jq -r
+}
+
+testjussicom() {
+  set -x
+  curl -s --data '[{"jsonrpc":"2.0", "method":"bridge.unread_notifications", "params":{"account":"initminer"}, "id":1}]' http://localhost:$JUSSI_PORT | jq -r
 }
 
 dbactivity() {
@@ -252,6 +279,7 @@ Commands:
 
  initdb        - initialize database cluster (e.g. postgresql database)
  importdb      - download and import the database dump
+ dumpdb        - dump the database (compressed binary file) from postgresql
 
  start|stop|restart (e.g. start all)
            all - initdb+postgresql+hivemind
@@ -264,6 +292,8 @@ Commands:
 
  testhive      - test a hive API call to hivemind
  testjussi     - test a steemd API call to jussi
+ testhivecom   - test a hive-communities API call to hivemind
+ testjussicom  - test a  hive-communities API call to jussi
 
  dbsize        - check the database size
  dbactivity    - check the database activity
@@ -287,6 +317,9 @@ case $1 in
   importdb)
     importdb
   ;;
+  dumpdb)
+    dumpdb
+  ;;
   logs)
     logs
   ;;
@@ -298,6 +331,12 @@ case $1 in
   ;;
   testjussi)
     testjussi
+  ;;
+  testhivecom)
+    testhivecom
+  ;;
+  testjussicom)
+    testjussicom
   ;;
   dbsize)
     dbsize

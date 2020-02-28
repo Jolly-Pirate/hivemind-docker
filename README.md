@@ -13,6 +13,7 @@ Table of Contents
    * [Preparation](#preparation)
    * [Running Postgres](#running-postgres)
    * [Importing database dump](#importing-database-dump)
+   * [Dumping database](#dumping-database)
    * [Running Hivemind](#running-hivemind)
    * [Running Hivemind and Postgres simultaneously](#running-hivemind-and-postgres-simultaneously)
    * [Testing Hivemind](#testing-hivemind)
@@ -70,6 +71,11 @@ NOTE: The download and import will run in screen sessions and automatically exit
 
 **ETA ~3h**
 
+## Dumping database
+Dump the database into a compressed binary file
+
+`./run.sh dumpdb`
+
 ## Running Hivemind
 After the DB import, start hivemind to synchronize the missing blocks.
 
@@ -114,6 +120,10 @@ and gives this result:
 ]
 ```
 
+You can also test hivemind-communities with:
+
+`./run.sh testhivecom`
+
 ## Running Jussi
 Jussi is an optional reverse proxy, its configuration won't be covered in this guide. You can check it out at https://github.com/steemit/jussi
 
@@ -121,9 +131,13 @@ Edit and place the DEV_config.json file in the hivemind-docker folder, then star
 
 `./run.sh start jussi`
 
-You can test it with
+You can test it with:
 
 `./run.sh testjussi`
+
+You can also test hivemind-communities via jussi with:
+
+`./run.sh testhivecom`
 
 ## Checking the logs
 At any time, you can check the logs with:
@@ -145,6 +159,7 @@ Here's a summary of the available commands:
 
  initdb        - initialize database cluster (e.g. postgresql database)
  importdb      - download and import the database dump
+ dumpdb        - dump the database (compressed binary file) from postgresql
 
  start|stop|restart (e.g. start all)
            all - initdb+postgresql+hivemind
@@ -157,6 +172,8 @@ Here's a summary of the available commands:
 
  testhive      - test a hive API call to hivemind
  testjussi     - test a steemd API call to jussi
+ testhivecom   - test a hive-communities API call to hivemind
+ testjussicom  - test a hive-communities API call to jussi
 
  dbsize        - check the database size
  dbactivity    - check the database activity
