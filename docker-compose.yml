@@ -67,6 +67,7 @@ services:
       - DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_URL/$POSTGRES_DB
       - STEEMD_URL=$RPC
       - SYNC_SERVICE=1
+      - MUTED_ACCOUNTS_URL=https://raw.githubusercontent.com/steemit/irredeemables/master/full.txt
     hostname: hive
     networks:
       - hivenet
