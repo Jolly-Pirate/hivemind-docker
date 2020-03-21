@@ -96,7 +96,7 @@ services:
     restart: always
   jussi:
      image: steemit/jussi:latest
-     container_name: jussi
+     container_name: $JUSSI_CONTAINER
      environment:
        - TZ=$TIMEZONE
        - JUSSI_UPSTREAM_CONFIG_FILE=/app/config.json

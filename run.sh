@@ -71,7 +71,7 @@ start() {
     jussi)
       if [ -f DEV_config.json ]; then
         docker-compose up -d jussi
-        show_logs jussi
+        show_logs jussi $JUSSI_CONTAINER
       else
         echo -e $bldred"Missing DEV_config.json file"$reset
       fi
