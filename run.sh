@@ -29,7 +29,9 @@ logs(){
 }
 
 show_logs() {
-  if [[ $(docker inspect -f {{.State.Running}} $1) == true ]]; then
+  # docker-compose uses the name of the service, whereas docker uses the container name
+  # pass argument $1 for docker-compose service, $2 for docker container name
+  if [[ $(docker inspect -f {{.State.Running}} $2) == true ]]; then
     echo -e $bldblu"Monitoring the logs (ctrl-c to stop monitoring)"$reset
     docker-compose logs -f $1
   else
@@ -49,7 +51,7 @@ start() {
     ;;
     postgres)
       docker-compose up -d postgres
-      show_logs $POSTGRES_CONTAINER
+      show_logs postgres $POSTGRES_CONTAINER
       #exit_status=$?
       exit_status=$(docker inspect --format='{{.State.ExitCode}}' ${POSTGRES_CONTAINER})
       if [ $exit_status == 1 ]; then
@@ -64,7 +66,7 @@ start() {
         exit
       fi
       docker-compose up -d hive
-      show_logs $HIVEMIND_CONTAINER
+      show_logs hive $HIVEMIND_CONTAINER
     ;;
     jussi)
       if [ -f DEV_config.json ]; then
