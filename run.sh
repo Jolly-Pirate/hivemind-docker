@@ -14,7 +14,7 @@ else
 fi
 
 if [[ ! $POSTGRES_DB || ! $POSTGRES_USER || ! $POSTGRES_PASSWORD || ! $HIVEMIND_CONTAINER || ! $POSTGRES_CONTAINER || ! $POSTGRES_INIT_CONTAINER \
-  || ! $HIVEMIND_PORT || ! $POSTGRES_PORT || ! $JUSSI_PORT || ! $DB_DUMP_URL || ! $RPC || ! $POSTGRES_URL || ! $DATA_DIR || ! $TIMEZONE ]]; then
+  || ! $HIVEMIND_PORT || ! $POSTGRES_PORT || ! $JUSSI_PORT || ! $DB_DUMP_URL || ! $DB_DUMP_URL_STATE || ! $RPC || ! $POSTGRES_URL || ! $DATA_DIR || ! $TIMEZONE ]]; then
   echo -e $bldred"Some variable(s) are not defined in the .env file"$reset
   exit
 fi
@@ -196,7 +196,7 @@ initdb() {
 }
 
 importdb() {
-  dump_state=$(curl -s http://hivemind.emrebeyler.me/dumps/state.txt)
+  dump_state=$(curl -s $DB_DUMP_URL_STATE)
   if [[ ! $(docker ps -aq -f status=running -f name=$POSTGRES_CONTAINER) ]]; then
     # Download DB
     echo -e $bldred"$POSTGRES_CONTAINER container not running, start it before downloading/importing the database"$reset
