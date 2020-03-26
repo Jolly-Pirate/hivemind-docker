@@ -99,6 +99,7 @@ services:
      environment:
        - TZ=$TIMEZONE
        - JUSSI_UPSTREAM_CONFIG_FILE=/app/config.json
+       - JUSSI_ACCOUNT_TRANSFER_STEEMD_URL=$JUSSI_ACCOUNT_TRANSFER_STEEMD_URL
      volumes:
         - ./DEV_config.json:/app/config.json
      hostname: jussi
