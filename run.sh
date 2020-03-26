@@ -182,8 +182,8 @@ You will have to re-login and restart the containers after the update.
 build(){
   docker-compose down
   #docker pull steemit/hivemind:latest # Update it
-  docker pull jollypirate/hivemind:214-core
-  docker tag jollypirate/hivemind:214-core hivemind:latest
+  docker pull jollypirate/hivemind:autoclave
+  #docker tag jollypirate/hivemind:214-core hivemind:latest
   docker rmi $POSTGRES_CONTAINER
   docker-compose build
   # Clean up

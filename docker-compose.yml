@@ -9,7 +9,7 @@ services:
         - POSTGRES_USER=$POSTGRES_USER
         - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
         - POSTGRES_DB=$POSTGRES_DB
-    image: $POSTGRES_CONTAINER:latest
+    image: $POSTGRES_IMAGE
     container_name: $POSTGRES_INIT_CONTAINER
     environment:
       - TZ=$TIMEZONE
@@ -29,7 +29,7 @@ services:
         - POSTGRES_USER=$POSTGRES_USER
         - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
         - POSTGRES_DB=$POSTGRES_DB
-    image: $POSTGRES_CONTAINER:latest
+    image: $POSTGRES_IMAGE
     container_name: $POSTGRES_CONTAINER
     environment:
       - TZ=$TIMEZONE
@@ -60,7 +60,7 @@ services:
         max-file: "1"
     restart: always
   hive:
-    image: hivemind:latest
+    image: $HIVEMIND_IMAGE
     container_name: $HIVEMIND_CONTAINER
     environment:
       - TZ=$TIMEZONE
@@ -94,7 +94,7 @@ services:
         max-file: "1"
     restart: always
   jussi:
-     image: steemit/jussi:latest
+     image: $JUSSI_IMAGE
      container_name: $JUSSI_CONTAINER
      environment:
        - TZ=$TIMEZONE
