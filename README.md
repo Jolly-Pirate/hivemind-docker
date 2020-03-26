@@ -45,7 +45,7 @@ Do the following steps sequentially:
 
 1. Create a .env file from the example and secure it\
 `cp .env.example .env`\
-`chmod 700 .env`
+`chmod 600 .env`
 2. Carefully edit all the variables in the .env file and save it\
 `nano .env`
 3. Preinstall tools and NTP synchronization\
