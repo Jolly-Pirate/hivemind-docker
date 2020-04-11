@@ -1,6 +1,6 @@
 Hivemind and PostgreSQL docker
 ===
-Hive (https://github.com/steemit/hivemind) is a "consensus interpretation" layer for the Steem blockchain, maintaining the state of social features such as post feeds, follows, and communities. Written in Python, it synchronizes an SQL database with chain state, providing developers with a more flexible/extensible alternative to the raw steemd API.
+Hivemind (https://gitlab.syncad.com/hive/hivemind) is a "consensus interpretation" layer for the Hive blockchain, maintaining the state of social features such as post feeds, follows, and communities. Written in Python, it synchronizes an SQL database with chain state, providing developers with a more flexible/extensible alternative to the raw steemd API.
 
 I'm using docker-compose for this project because of its flexibility in managing multiple containers, and to minimize the use of long complicated docker cli commands. With dependency checks in the scripts, I covered many possibilities to make a hivemind deployment easy. The tricky and frustrating part was to get postgres to use a mapped local database outside of docker volumes. The reason for that is to have better control of the database and to simplify  redeployment to other servers, instead of having to redownload/reimport a dump which takes hours. Postgres is picky about permissions, plus its native command `initdb` was causing errors when synchronizing an imported hivemind dump. After solving the problems with some workarounds and thoroughly testing, hivemind-docker was finally ready.
 
@@ -79,7 +79,7 @@ Dump the database into a compressed binary file
 ## Running Hivemind
 After the DB import, start hivemind to synchronize the missing blocks.
 
-`./run.sh start hive`
+`./run.sh start hivemind`
 
 **ETA ~1h**
 
@@ -99,7 +99,7 @@ If you already imported the database, doing `./run.sh start all` will resume syn
 ## Testing Hivemind
 Once hivemind is fully synchronized, you can test it by querying it on the port you defined in `.env`, for example `HIVEMIND_PORT=8080`:
 
-`./run.sh testhive`
+`./run.sh testhivemind`
 
 which runs this command:
 
@@ -164,20 +164,20 @@ Here's a summary of the available commands:
  start|stop|restart (e.g. start all)
            all - initdb+postgresql+hivemind
       postgres - postgresql container (with initdb dependency)
-          hive - hivemind container (with postgresql dependency)
+      hivemind - hivemind container (with postgresql dependency)
          jussi - jussi reverse proxy
- enter         - enter a container with bash shell; e.g. enter hive
+ enter         - enter a container with bash shell; e.g. enter hivemind
  logs          - live logs of the running containers
  status        - check the containers status
 
- testhive      - test a hive API call to hivemind
+ testhivemind  - test a hivemind API call to hivemind
  testjussi     - test a steemd API call to jussi
- testhivecom   - test a hive-communities API call to hivemind
- testjussicom  - test a hive-communities API call to jussi
+ testhivecom   - test a hivemind-communities API call to hivemind
+ testjussicom  - test a hivemind-communities API call to jussi
 
  dbsize        - check the database size
  dbactivity    - check the database activity
 ```
 
 ---
-###### tags: `steemd` `hivemind` `postgresql` `blockchain` `database` `docker` `docker-compose`
+###### tags: `hive` `hivemind` `steemd` `postgresql` `blockchain` `database` `docker` `docker-compose`

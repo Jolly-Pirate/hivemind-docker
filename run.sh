@@ -45,7 +45,7 @@ start() {
       # Better to initdb and remove it instead of depends_on in the yml
       docker-compose up initdb
       docker-compose rm -f initdb
-      docker-compose up -d postgres hive
+      docker-compose up -d postgres hivemind
       #docker-compose up -d --scale jussi=0 --scale initdb=0 # Do not start jussi, initdb=0 will also stop/rm it
       logs
     ;;
@@ -60,13 +60,13 @@ start() {
         docker-compose rm -f postgres
       fi
     ;;
-    hive)
+    hivemind)
       if [[ ! $(docker ps -aq -f status=running -f name=$POSTGRES_CONTAINER) ]]; then
         echo -e $bldred"$POSTGRES_CONTAINER service not running, start it before running hivemind"$reset
         exit
       fi
-      docker-compose up -d hive
-      show_logs hive $HIVEMIND_CONTAINER
+      docker-compose up -d hivemind
+      show_logs hivemind $HIVEMIND_CONTAINER
     ;;
     jussi)
       if [ -f DEV_config.json ]; then
@@ -85,7 +85,7 @@ stop() {
 }
 
 if [[ $1 =~ start|stop|restart ]]; then
-  if [[ $2 =~ all|hive|jussi|postgres ]]; then
+  if [[ $2 =~ all|hivemind|jussi|postgres ]]; then
     case $1 in
       start)
         start $2
@@ -93,10 +93,10 @@ if [[ $1 =~ start|stop|restart ]]; then
       stop)
         case $2 in
           all)
-            stop hive
+            stop hivemind
             stop postgres
           ;;
-          postgres|hive|jussi)
+          postgres|hivemind|jussi)
             stop $2
           ;;
         esac
@@ -104,10 +104,10 @@ if [[ $1 =~ start|stop|restart ]]; then
       restart)
         case $2 in
           all)
-            stop "postgres hive"
+            stop "postgres hivemind"
             start all
           ;;
-          postgres|hive|jussi)
+          postgres|hivemind|jussi)
             stop $2
             start $2
           ;;
@@ -115,7 +115,7 @@ if [[ $1 =~ start|stop|restart ]]; then
       ;; # End of case restart
     esac # End of case $1
   else
-    echo -e $bldpur"Specify a container: all, hive, jussi or postgres"$reset
+    echo -e $bldpur"Specify a container: all, hivemind, jussi or postgres"$reset
   fi
   exit
 fi
@@ -130,7 +130,7 @@ if [[ $1 == enter ]]; then
       docker ps | grep -v NAMES | awk '{ print $NF }'
     fi
   else
-    echo -e $bldpur"Specify a container, e.g. ./run.sh enter hive"$reset
+    echo -e $bldpur"Specify a container, e.g. ./run.sh enter hivemind"$reset
   fi
   exit
 fi
@@ -181,9 +181,8 @@ You will have to re-login and restart the containers after the update.
 
 build(){
   docker-compose down
-  #docker pull steemit/hivemind:latest # Update it
-  docker pull jollypirate/hivemind:autoclave
-  #docker tag jollypirate/hivemind:214-core hivemind:latest
+  docker pull jollypirate/hivemind:autoclave # or build your own image
+  docker pull jollypirate/jussi:autoclave # or build your own image
   docker rmi $POSTGRES_CONTAINER
   docker-compose build
   # Clean up
@@ -243,7 +242,7 @@ status(){
   docker-compose ps
 }
 
-testhive() {
+testhivemind() {
   set -x
   curl -s --data '[{"jsonrpc":"2.0", "method":"condenser_api.get_follow_count", "params":{"account":"initminer"}, "id":1}]' http://localhost:$HIVEMIND_PORT | jq -r
 }
@@ -286,16 +285,16 @@ Commands:
  start|stop|restart (e.g. start all)
            all - initdb+postgresql+hivemind
       postgres - postgresql container (with initdb dependency)
-          hive - hivemind container (with postgresql dependency)
+      hivemind - hivemind container (with postgresql dependency)
          jussi - jussi reverse proxy
- enter         - enter a container with bash shell; e.g. enter hive
+ enter         - enter a container with bash shell; e.g. enter hivemind
  logs          - live logs of the running containers
  status        - check the containers status
 
- testhive      - test a hive API call to hivemind
+ testhivemind  - test a hivemind API call to hivemind
  testjussi     - test a steemd API call to jussi
- testhivecom   - test a hive-communities API call to hivemind
- testjussicom  - test a  hive-communities API call to jussi
+ testhivecom   - test a hivemind-communities API call to hivemind
+ testjussicom  - test a hivemind-communities API call to jussi
 
  dbsize        - check the database size
  dbactivity    - check the database activity
@@ -328,8 +327,8 @@ case $1 in
   status)
     status
   ;;
-  testhive)
-    testhive
+  testhivemind)
+    testhivemind
   ;;
   testjussi)
     testjussi

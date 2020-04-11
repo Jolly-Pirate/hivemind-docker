@@ -59,7 +59,7 @@ services:
         max-size: "1G"
         max-file: "1"
     restart: always
-  hive:
+  hivemind:
     image: $HIVEMIND_IMAGE
     container_name: $HIVEMIND_CONTAINER
     environment:
@@ -67,7 +67,9 @@ services:
       - DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_URL/$POSTGRES_DB
       - STEEMD_URL={"default":"$RPC"}
       - SYNC_SERVICE=1
-    hostname: hive
+      - BLACKLIST_API_URL=$BLACKLIST_API_URL
+      - MUTED_ACCOUNTS_URL=$MUTED_ACCOUNTS_URL
+    hostname: hivemind
     networks:
       - hivenet
     ports:
