@@ -231,8 +231,8 @@ dumpdb() {
   archive_filename="hive_latest.dump"
   if [ ! -f $archive_filename ]; then
     sleep 3
-    # Dump DB
-    time screen -S import -m bash -c "echo -e \"$bldblu Dumping the database from postgresql using `expr $(nproc) - 2` jobs (screen session) $reset\" ; docker exec -i $POSTGRES_CONTAINER bash -c \"PGPASSWORD=$POSTGRES_PASSWORD pg_dump -U $POSTGRES_USER -d $POSTGRES_DB\" -j`expr $(nproc) - 2` -Fc | pv --progress --size 1g > $archive_filename"
+    # Dump DB. Setting PGPASSWORD as env variable to avoid showing it in monitoring tools like htop
+    time screen -S import -m bash -c "echo -e \"$bldblu Dumping the database from postgresql (screen session) $reset\" ; docker exec -i $POSTGRES_CONTAINER bash -c \"PGPASSWORD=$POSTGRES_PASSWORD pg_dump -d postgresql://$POSTGRES_USER@$POSTGRES_URL/$POSTGRES_DB -Fc\" | pv --progress --size 1g > $archive_filename"
   else
     echo -e $bldred"$archive_filename exists, delete it first"$reset
   fi
