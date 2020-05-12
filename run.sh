@@ -180,10 +180,19 @@ You will have to re-login and restart the containers after the update.
 }
 
 build(){
-  docker-compose down
-  docker pull jollypirate/hivemind:autoclave # or build your own image
-  docker pull jollypirate/jussi:autoclave # or build your own image
-  docker rmi $POSTGRES_CONTAINER
+  # Pull docker image if it exists on dockerhub https://stackoverflow.com/a/56316948/5369345
+  if DOCKER_CLI_EXPERIMENTAL=enabled docker manifest inspect $HIVEMIND_IMAGE >/dev/null; then
+    docker pull $HIVEMIND_IMAGE
+  else
+    echo -e $bldred"$HIVEMIND_IMAGE doesn't exist on dockerhub, please build a hivemind image https://gitlab.syncad.com/hive/hivemind"$reset
+    sleep 3
+  fi
+  if DOCKER_CLI_EXPERIMENTAL=enabled docker manifest inspect $JUSSI_IMAGE >/dev/null; then
+    docker pull $JUSSI_IMAGE
+  else
+    echo -e $bldred"$JUSSI_IMAGE doesn't exist on dockerhub, please build a jussi image https://gitlab.syncad.com/hive/jussi"$reset
+    sleep 3
+  fi
   docker-compose build
   # Clean up
   echo "Pruning unused volumes" ; docker volume prune -f ; echo "Pruning unused networks" ; docker network prune -f ; docker ps -a -q -f status=exited | xargs docker rm >&/dev/null ; docker images | grep '<none>' | awk '{print $3}' | xargs docker rmi -f >&/dev/null
