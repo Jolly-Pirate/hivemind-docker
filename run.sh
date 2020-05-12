@@ -212,11 +212,11 @@ importdb() {
     if [ -f dump/$archive_filename ]; then
       # Import DB. Can't restore from a pipe when multithreading with -j. Workaround by mounting volume /dump.
       time screen -S importdb -m bash -c "
-	  echo -e \"$bldblu Importing the dump into postgresql using `expr $(nproc) - 2` jobs (screen session) $reset\"
-	  sleep 3
-	  docker exec -it $POSTGRES_CONTAINER bash -c \"
-	    PGPASSWORD=$POSTGRES_PASSWORD pg_restore -d postgresql://$POSTGRES_USER@$POSTGRES_URL/$POSTGRES_DB -j `expr $(nproc) - 2` /tmp/$archive_filename
-	    \"
+      echo -e \"$bldblu Importing the dump into postgresql using `expr $(nproc) - 2` jobs (screen session) $reset\"
+      sleep 3
+      docker exec -it $POSTGRES_CONTAINER bash -c \"
+        PGPASSWORD=$POSTGRES_PASSWORD pg_restore -d postgresql://$POSTGRES_USER@$POSTGRES_URL/$POSTGRES_DB -j `expr $(nproc) - 2` /tmp/$archive_filename
+        \"
       "
       # Check the DB size
       dbsize
@@ -235,15 +235,16 @@ dumpdb() {
   fi
   archive_filename="hive_latest.dump"
   if [ ! -f dump/$archive_filename ]; then
+    chmod o+w dump # w permission for pg_dump
     # Dump DB. Set PGPASSWORD as env variable to avoid showing it in monitoring tools like htop.
     time screen -S dumpdb -m bash -c "
-	echo -e \"$bldblu Dumping the database from postgresql using `expr $(nproc) - 2` jobs (screen session) $reset\"
-	sleep 3
-	docker exec -it $POSTGRES_CONTAINER bash -c \"
-	  touch /tmp/$archive_filename
-	  chmod o+rw /tmp/$archive_filename
-	  PGPASSWORD=$POSTGRES_PASSWORD pg_dump -v -d postgresql://$POSTGRES_USER@$POSTGRES_URL/$POSTGRES_DB -Fc -f /tmp/$archive_filename
-	  \"
+    echo -e \"$bldblu Dumping the database from postgresql (screen session) $reset\"
+    sleep 3
+    docker exec -it $POSTGRES_CONTAINER bash -c \"
+      touch /tmp/$archive_filename
+      chmod o+w /tmp/$archive_filename # w permission for the docker host
+      PGPASSWORD=$POSTGRES_PASSWORD pg_dump -v -d postgresql://$POSTGRES_USER@$POSTGRES_URL/$POSTGRES_DB -Fc -f /tmp/$archive_filename
+      \"
     "
   else
     echo -e $bldred"dump/$archive_filename exists, delete it first"$reset
