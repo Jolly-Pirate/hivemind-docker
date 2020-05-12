@@ -207,15 +207,21 @@ importdb() {
     # Extract base filename from url, also: url=http://www.foo.bar/file.ext; basename $url
     archive_filename=$(url=${DB_DUMP_URL}; echo "${url##*/}")
     echo -e $bldblu"Downloading the latest dump (screen session)"$reset
-    wget -c $DB_DUMP_URL
-    if [ -f $archive_filename ]; then
-      sleep 3
-      # Import DB
-      time screen -S import -m bash -c "echo -e \"$bldblu Importing the dump into postgresql using `expr $(nproc) - 2` jobs (screen session) $reset\" ; pv $archive_filename | docker exec -i $POSTGRES_CONTAINER bash -c \"PGPASSWORD=$POSTGRES_PASSWORD pg_restore -U $POSTGRES_USER -d $POSTGRES_DB\" -j `expr $(nproc) - 2`"
+    wget -nc $DB_DUMP_URL -O dump/$archive_filename
+    sleep 3
+    if [ -f dump/$archive_filename ]; then
+      # Import DB. Can't restore from a pipe when multithreading with -j. Workaround by mounting volume /dump.
+      time screen -S importdb -m bash -c "
+	  echo -e \"$bldblu Importing the dump into postgresql using `expr $(nproc) - 2` jobs (screen session) $reset\"
+	  sleep 3
+	  docker exec -it $POSTGRES_CONTAINER bash -c \"
+	    PGPASSWORD=$POSTGRES_PASSWORD pg_restore -d postgresql://$POSTGRES_USER@$POSTGRES_URL/$POSTGRES_DB -j `expr $(nproc) - 2` /tmp/$archive_filename
+	    \"
+      "
       # Check the DB size
       dbsize
     else
-      echo -e $bldred"Missing $archive_filename, nothing to do"$reset
+      echo -e $bldred"Missing dump/$archive_filename, nothing to do"$reset
     fi
   else
     echo -e $bldpur"DB dump still in progress, retry later"$reset
@@ -227,14 +233,20 @@ dumpdb() {
     echo -e $bldred"$POSTGRES_CONTAINER container not running, start it before dumping the database"$reset
     exit
   fi
-  # Extract base filename from url, also: url=http://www.foo.bar/file.ext; basename $url
   archive_filename="hive_latest.dump"
-  if [ ! -f $archive_filename ]; then
-    sleep 3
-    # Dump DB. Setting PGPASSWORD as env variable to avoid showing it in monitoring tools like htop
-    time screen -S import -m bash -c "echo -e \"$bldblu Dumping the database from postgresql (screen session) $reset\" ; docker exec -i $POSTGRES_CONTAINER bash -c \"PGPASSWORD=$POSTGRES_PASSWORD pg_dump -d postgresql://$POSTGRES_USER@$POSTGRES_URL/$POSTGRES_DB -Fc\" | pv --progress --size 1g > $archive_filename"
+  if [ ! -f dump/$archive_filename ]; then
+    # Dump DB. Set PGPASSWORD as env variable to avoid showing it in monitoring tools like htop.
+    time screen -S dumpdb -m bash -c "
+	echo -e \"$bldblu Dumping the database from postgresql using `expr $(nproc) - 2` jobs (screen session) $reset\"
+	sleep 3
+	docker exec -it $POSTGRES_CONTAINER bash -c \"
+	  touch /tmp/$archive_filename
+	  chmod o+rw /tmp/$archive_filename
+	  PGPASSWORD=$POSTGRES_PASSWORD pg_dump -v -d postgresql://$POSTGRES_USER@$POSTGRES_URL/$POSTGRES_DB -Fc -f /tmp/$archive_filename
+	  \"
+    "
   else
-    echo -e $bldred"$archive_filename exists, delete it first"$reset
+    echo -e $bldred"dump/$archive_filename exists, delete it first"$reset
   fi
 }
 

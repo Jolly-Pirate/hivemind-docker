@@ -43,6 +43,7 @@ services:
       - $POSTGRES_PORT:5432
     volumes:
        - ./$DATA_DIR/$POSTGRES_DB:/var/lib/postgresql/10/main
+       - ./dump:/tmp
     # loop workaround to avoid a race condition
     command: >
       bash -c "
