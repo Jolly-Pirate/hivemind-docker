@@ -215,7 +215,7 @@ importdb() {
       echo -e \"$bldblu Importing the dump into postgresql using `expr $(nproc) - 2` jobs (screen session) $reset\"
       sleep 3
       docker exec -it $POSTGRES_CONTAINER bash -c \"
-        PGPASSWORD=$POSTGRES_PASSWORD pg_restore -d postgresql://$POSTGRES_USER@$POSTGRES_URL/$POSTGRES_DB -j `expr $(nproc) - 2` /tmp/$archive_filename
+        PGPASSWORD=$POSTGRES_PASSWORD pg_restore -v -d postgresql://$POSTGRES_USER@$POSTGRES_URL/$POSTGRES_DB -j `expr $(nproc) - 2` /tmp/$archive_filename
         \"
       "
       # Check the DB size
