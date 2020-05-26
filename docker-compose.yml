@@ -44,6 +44,7 @@ services:
     volumes:
        - ./$DATA_DIR/$POSTGRES_DB:/var/lib/postgresql/10/main
        - ./dump:/tmp
+       - ./confpg/:/etc/postgresql/
     # loop workaround to avoid a race condition
     command: >
       bash -c "
