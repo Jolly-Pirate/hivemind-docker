@@ -68,8 +68,8 @@ services:
       - DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_URL/$POSTGRES_DB
       - STEEMD_URL={"default":"$RPC"}
       - SYNC_SERVICE=1
-      - BLACKLIST_API_URL=$BLACKLIST_API_URL
-      - MUTED_ACCOUNTS_URL=$MUTED_ACCOUNTS_URL
+      #- BLACKLIST_API_URL=$BLACKLIST_API_URL
+      #- MUTED_ACCOUNTS_URL=$MUTED_ACCOUNTS_URL
     hostname: hivemind
     networks:
       - hivenet
