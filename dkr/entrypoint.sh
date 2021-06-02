@@ -19,8 +19,11 @@ if [[ $1 == "init" ]]; then
     # Create db and user
     /etc/init.d/postgresql start
     if [ ! $(PGPASSWORD=$POSTGRES_PASSWORD psql -U $POSTGRES_USER -l | awk '{print $1}' | grep -w $POSTGRES_DB 2>&1 /dev/null) ]; then
-      echo -e $bldblu"Creating user and database"$reset
+      echo -e $bldblu"Creating user"$reset
       psql --command "CREATE USER $POSTGRES_USER WITH SUPERUSER PASSWORD '$POSTGRES_PASSWORD';"
+      echo -e $bldblu"Creating intarray extension"$reset
+      psql --command "CREATE EXTENSION IF NOT EXISTS intarray;"
+      echo -e $bldblu"Creating database"$reset
       createdb -O $POSTGRES_USER $POSTGRES_DB
       PGPASSWORD=$POSTGRES_PASSWORD psql -U $POSTGRES_USER -c "SELECT pg_size_pretty(pg_database_size('$POSTGRES_DB'));"
     else

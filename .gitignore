@@ -3,6 +3,7 @@
 **/*.dump
 **/*.gz
 **/*.json
+**/dump
 **/pgdata
 **/tmp
 **/trash
